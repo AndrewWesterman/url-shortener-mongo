@@ -13,17 +13,30 @@ http.createServer(app).listen(3000);
 
 app.use(express.static(__dirname + "/client"));
 app.use(bodyParser());
-
-setInterval(function(){
-    urlShort.next();
-},1000);
-
     
 app.post("/url", function(req,res){
-    var url = "http://localhost:3000/",
-        suffix;
+    var url = req.body.url;
+    if(urlShort.isLong(url)){
+        urlShort.shorten(url);
+    }    
+    client.get(url, function(err, reqUrl){
+        if(err !== null){
+            console.log("ERROR: "+ err);
+            return;
+        }
+        res.json({url: reqUrl});
+    });
+});
 
-    res.json({url: url});
+app.get("/:short", function(req,res){
+    var shortUrl = "http://localhost:3000/"+req.params.short;
+    client.get(shortUrl, function(err, longUrl){
+        if(err !== null){
+            console.log("ERROR: "+ err);
+            return;
+        }
+        res.redirect(longUrl);
+    });
 });
 
 
