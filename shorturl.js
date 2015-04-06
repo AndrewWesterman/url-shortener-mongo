@@ -39,19 +39,21 @@ var getRandomInt = function(max, min){
 // shortens a long url
 var shorten = function(longUrl){
     nextKey();
-    client.get("next", function(err, next){
-        if(err !== null){
-            console.log("ERROR: "+ err);
-            return;
-        }
-        var key = parseInt(next,10);
-        
-        shortUrl = "http://localhost:3000/"+key.toString(36);
-        console.log("Key "+key);
-        client.set(shortUrl,longUrl);
-        client.set(longUrl,shortUrl);
-        client.zadd("top10", 0, shortUrl);
-    });
+    (function(){
+        client.get("next", function(err, next){
+            if(err !== null){
+                console.log("ERROR: "+ err);
+                return;
+            }
+            var key = parseInt(next,10);
+            
+            shortUrl = "http://localhost:3000/"+key.toString(36);
+            console.log("Key "+key);
+            client.set(shortUrl,longUrl);
+            client.set(longUrl,shortUrl);
+            client.zadd("top10", 0, shortUrl);
+        });
+    })(); 
 };
 
 // increments the number of clicks for the given url
@@ -59,13 +61,13 @@ var addScore = function(url){
     client.zincrby("top10",1,url);
 };
 
-var getTopTen = function(){
-    
+var init = function(){
+    nextKey();
 };
 
 module.exports = {
     shorten: shorten,
     isLong: isLong,
     addScore: addScore,
-    getTopTen: getTopTen
+    init: init
 };

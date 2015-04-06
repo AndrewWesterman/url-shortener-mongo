@@ -12,31 +12,36 @@ http.createServer(app).listen(3000);
 
 app.use(express.static(__dirname + "/client"));
 app.use(bodyParser());
+urlShort.init();
     
 app.post("/url", function(req,res){
     var url = req.body.url;
-    client.exists("url", function(error, exists){
-        console.log(exists);
-        if(error){
-            console.log("ERROR: "+error);
-        } else if(!exists){
-            // console.log("New url entered!");
-            if(urlShort.isLong(url)){
-                console.log("Shortening "+url);
-                urlShort.shorten(url);
-            }          
-        } else {
-            client.get(url, function(err, reqUrl){
-                if(err !== null){
-                    console.log("ERROR: "+ err);
-                    return;
-                }
-                // console.log("Requested url: "+reqUrl);
-                res.json({url: reqUrl});
-            });
+    client.get(url, function(err, reqUrl){
+        if(err !== null){
+            console.log("ERROR: "+ err);
+            return;
         }
+        console.log("Requested url: "+reqUrl);
+        res.json({url: reqUrl});
     });
     
+});
+
+app.post("/short", function(req,res){
+    var url = req.body.url;
+    client.exists(url, function(error, exists){
+        console.log(url);
+        if(error){
+            console.log("ERROR: "+error);
+            return;
+        } else if(!exists){
+            console.log("New url entered!");
+            if(urlShort.isLong(url)){
+                console.log("Shortening "+url);
+                urlShort.shorten(url);                    
+            }
+        }
+    });
 });
 
 app.post("/ten", function(req,res){
