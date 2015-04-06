@@ -1,7 +1,5 @@
 var main = function(){
 
-    console.log("Base36: "+ (1000000).toString(36));
-
     $("#submit").on("click", function(){
         console.log("You entered a URL!");
         var submittedURL = $("#url").val();

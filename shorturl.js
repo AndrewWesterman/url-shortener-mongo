@@ -7,7 +7,7 @@ var isLong = function(url){
     return url.indexOf("localhost") === -1;
 };
 
-var nextKey = function(callback){
+var nextKey = function(){
     // http://blog.semmy.me/post/18348581070/persistence-with-redis-and-node-js
     client.exists("next", function(error, exists){
         if(error){
@@ -38,7 +38,7 @@ var getRandomInt = function(max, min){
 
 // shortens a long url
 var shorten = function(longUrl){
-    nextKey(function(){});
+    nextKey();
     client.get("next", function(err, next){
         if(err !== null){
             console.log("ERROR: "+ err);
@@ -50,12 +50,21 @@ var shorten = function(longUrl){
         console.log("Key "+key);
         client.set(shortUrl,longUrl);
         client.set(longUrl,shortUrl);
-
+        client.zadd("top10", 0, shortUrl);
     });
 };
+
+var addScore = function(url){
+    client.zincrby("top10",1,url);
+};
+
+// var getTopTen = function(){
+//     var top10 = [];
+//     client.zrange("top10",10,);
+// };
 
 module.exports = {
     shorten: shorten,
     isLong: isLong,
-    next: nextKey
+    addScore: addScore
 };

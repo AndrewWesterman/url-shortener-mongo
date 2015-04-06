@@ -16,9 +16,15 @@ app.use(bodyParser());
     
 app.post("/url", function(req,res){
     var url = req.body.url;
-    if(urlShort.isLong(url)){
-        urlShort.shorten(url);
-    }    
+    client.exists("next", function(error, exists){
+        if(error){
+            console.log("ERROR: "+error);
+        } else if(!exists){
+            if(urlShort.isLong(url)){
+                urlShort.shorten(url);
+            }          
+        }
+    });
     client.get(url, function(err, reqUrl){
         if(err !== null){
             console.log("ERROR: "+ err);
@@ -35,6 +41,7 @@ app.get("/:short", function(req,res){
             console.log("ERROR: "+ err);
             return;
         }
+        urlShort.addScore(shortUrl);
         res.redirect(longUrl);
     });
 });
