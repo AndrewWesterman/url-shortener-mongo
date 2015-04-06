@@ -6,8 +6,7 @@ var express = require("express"),
     bodyParser = require("body-parser"),
     client = redis.createClient(),
     app = express(),
-    urlShort = require("./shorturl.js"),
-    INIT_KEY = 1000000;
+    urlShort = require("./shorturl.js");
 
 http.createServer(app).listen(3000);
 
@@ -16,22 +15,42 @@ app.use(bodyParser());
     
 app.post("/url", function(req,res){
     var url = req.body.url;
-    client.exists("next", function(error, exists){
+    client.exists("url", function(error, exists){
+        console.log(exists);
         if(error){
             console.log("ERROR: "+error);
         } else if(!exists){
+            // console.log("New url entered!");
             if(urlShort.isLong(url)){
+                console.log("Shortening "+url);
                 urlShort.shorten(url);
             }          
+        } else {
+            client.get(url, function(err, reqUrl){
+                if(err !== null){
+                    console.log("ERROR: "+ err);
+                    return;
+                }
+                // console.log("Requested url: "+reqUrl);
+                res.json({url: reqUrl});
+            });
         }
     });
-    client.get(url, function(err, reqUrl){
+    
+});
+
+app.post("/ten", function(req,res){
+    client.zrevrange("top10",0,9, function(err, result){
         if(err !== null){
             console.log("ERROR: "+ err);
             return;
         }
-        res.json({url: reqUrl});
-    });
+        var top10 = [];
+        result.forEach(function(url){
+            top10.push(url);
+        });
+        res.json({top10: top10});
+    });    
 });
 
 app.get("/:short", function(req,res){
@@ -45,6 +64,7 @@ app.get("/:short", function(req,res){
         res.redirect(longUrl);
     });
 });
+
 
 
 console.log("Server listening on http://localhost:3000");

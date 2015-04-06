@@ -54,17 +54,18 @@ var shorten = function(longUrl){
     });
 };
 
+// increments the number of clicks for the given url
 var addScore = function(url){
     client.zincrby("top10",1,url);
 };
 
-// var getTopTen = function(){
-//     var top10 = [];
-//     client.zrange("top10",10,);
-// };
+var getTopTen = function(){
+    
+};
 
 module.exports = {
     shorten: shorten,
     isLong: isLong,
-    addScore: addScore
+    addScore: addScore,
+    getTopTen: getTopTen
 };
