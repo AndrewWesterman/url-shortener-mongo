@@ -4,13 +4,8 @@ var mongoose = require("mongoose"),
         "short": String,
         "score": Number
     }),
-    Top10Schema = mongoose.Schema({
-        "url": String,
-        "score": Number
-    }),
     Url = mongoose.model("Url", UrlSchema),
     Key = mongoose.model("Key", {key: Number}),
-    Top10 = mongoose.model("Top10", Top10Schema),
     INIT_KEY = 1000000;
 
 // returns true if the given url is long form
